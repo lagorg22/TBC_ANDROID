@@ -35,7 +35,7 @@ fun main() {
 
 fun getCommand(): Boolean{
     while (true){
-        val command: String? = readlnOrNull()
+        val command: String = readln()
         if (command == "y") {
             break
         } else if (command == "n") {
