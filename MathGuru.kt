@@ -19,9 +19,9 @@ open class MathGuru(): Functions{
             println("GCD of 0 and 0 is undefined")
             return null
         }else if (factorsOfA.isNotEmpty() && factorsOfB.isEmpty()){
-            return a
+            return if (a > 0) a else -a
         }else if (factorsOfA.isEmpty() && factorsOfB.isNotEmpty()){
-            return b
+            return if (b > 0) b else -b
         }
         var result = 1
         for (num in factorsOfA.keys) {
@@ -45,7 +45,7 @@ open class MathGuru(): Functions{
         }else if(factorsOfA.isEmpty() || factorsOfB.isEmpty()){
             return 0
         }
-        var result = a
+        var result = if (a > 0) a else -a
         for (num in factorsOfB.keys){
             val freqOfNumInA = factorsOfA[num] ?: 0
             val freqOfNumInB = factorsOfB[num] ?: 0
@@ -123,18 +123,115 @@ open class MathGuru(): Functions{
 
 }
 
-//class TestMath(): MathGuru(){
-//    fun testGCD(){
-//
-//    }
-//}
+class TestMath(): MathGuru(){
+    fun testGCD(){
+        println("===============================Testing GCD=============================")
+        testGCDPositiveIntegers()
+        testGCDNegativeIntegers()
+        testGCDZeroValues()
+    }
+
+    private fun testGCDPositiveIntegers(){
+        println("<======Testing On Positive Integers=======>")
+        val answers = listOf(1, 12, 27, 11)
+        val firstValues = listOf(2, 12, 54, 77)
+        val secondValues = listOf(7, 48, 27, 33)
+        testCaseCheckTwoArgs(firstValues, secondValues, answers, ::gcd)
+    }
+
+    private fun testGCDNegativeIntegers(){
+        println("<======Testing On Negative Integers=======>")
+        val answers = listOf(5, 9, 1, 8)
+        val firstValues = listOf(-5, 45, -7, 32)
+        val secondValues = listOf(5, -18, -46, -8)
+        testCaseCheckTwoArgs(firstValues, secondValues, answers, ::gcd)
+    }
+
+    private fun testGCDZeroValues(){
+        println("<======Testing On Negative Integers=======>")
+        val answers = listOf(11, 2, 45, null)
+        val firstValues = listOf(0, -2, 45, 0)
+        val secondValues = listOf(11, -0, 0, 0)
+        testCaseCheckTwoArgs(firstValues, secondValues, answers, ::gcd)
+    }
+
+    fun testLCM(){
+        println("===============================Testing LCM=============================")
+        testLCMPositiveIntegers()
+        testLCMNegativeIntegers()
+        testLCMZeroValues()
+    }
+
+    private fun testLCMNegativeIntegers(){
+        println("<======Testing On Negative Integers=======>")
+        val answers = listOf(5, 360, 46, 56)
+        val firstValues = listOf(-5, -45, 23, -7)
+        val secondValues = listOf(5, -8, -46, -8)
+        testCaseCheckTwoArgs(firstValues, secondValues, answers, ::lcm)
+    }
+
+    private fun testLCMPositiveIntegers(){
+        println("<======Testing On Positive Integers=======>")
+        val answers = listOf(20, 24, 66, 143)
+        val firstValues = listOf(4, 12, 22, 11)
+        val secondValues = listOf(5, 8, 33, 13)
+        testCaseCheckTwoArgs(firstValues, secondValues, answers, ::lcm)
+    }
+
+    private fun testLCMZeroValues(){
+        println("<======Testing On Zeroes=======>")
+        val answers = listOf(0, null, 0, 0)
+        val firstValues = listOf(0, 0, -7, 0)
+        val secondValues = listOf(5, 0, 0, -2)
+        testCaseCheckTwoArgs(firstValues, secondValues, answers, ::lcm)
+    }
+
+    fun testContainsDollarSign(){
+        println("==============================Testing Dollar Sign $========================================")
+        val tmp = "fdsf"
+        val values = listOf("\$kjflds", "lkfds\$", "fds\$fdsfs", "\$\$\$", "", "fdsfs", " ", "fds$tmp", "$tmp")
+        val answers = listOf(true, true, true, true, false, false, false, false, false)
+        for (i in values.indices){
+            val currentCase = values[i]
+            val ans = answers[i]
+            val retValue = containsDollarSign(currentCase)
+            if (retValue != answers[i]){
+                println("Function failed on testcase: containsDollarSign($currentCase). expected: $ans, got: $retValue.")
+            }
+        }
+    }
+
+    private fun testCaseCheckTwoArgs(firstValues: List<Int>, secondValues: List<Int>, answers: List<Int?>,
+                                     func: (Int, Int) -> Int?){
+        var allPassed = true
+        for (vals in (firstValues.zip(secondValues)).zip(answers)) {
+            val a = vals.first.first
+            val b = vals.first.second
+            val ans = vals.second
+            val retValue = func(a, b)
+            if (retValue != ans) {
+                println("Function failed on testcase: ${func.toString().split(' ')[1]}($a, $b). expected: $ans, got:$retValue.")
+                allPassed = false
+            }
+        }
+        if(allPassed) println("Passed all tests.")
+    }
+
+    private fun testCaseCheckSingleArg(values: List<Any>, answers: List<Any>, func: (Any) -> Any){
+
+    }
+}
 
 fun main() {
-    val m = MathGuru()
-    println(m.containsDollarSign("abhd$sa"))
-    println(m.isPalindrome("jkhfdsj"))
-    println(m.reverseNum(123))
-    println(m.evenSum(100))
-    println(m.gcd(150, 0))
-    println(m.lcm(5, 8 ))
+//    val m = MathGuru()
+//    println(m.containsDollarSign("abhd$sa"))
+//    println(m.isPalindrome("jkhfdsj"))
+//    println(m.reverseNum(123))
+//    println(m.evenSum(100))
+//    println(m.gcd(-2, 0))
+//    println(m.lcm(-5, 8 ))
+    val t = TestMath()
+//    t.testLCM()
+//    t.testGCD()
+    t.testContainsDollarSign()
 }
