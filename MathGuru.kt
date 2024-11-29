@@ -1,34 +1,50 @@
-import java.lang.Math.pow
 import java.lang.Math.min
+import kotlin.math.pow
 
-interface Operations{
-    fun gcd(a: Int, b: Int): Int
-    fun lcm(a: Int, b: Int): Int
-    fun dollarCount(s: String): Boolean
+interface Functions{
+    fun gcd(a: Int, b: Int): Int?
+    fun lcm(a: Int, b: Int): Int?
+    fun containsDollarSign(s: String): Boolean
     fun evenSum(n: Int=100): Int
     fun reverseNum(num: Int): Int
     fun isPalindrome(s: String): Boolean
 }
 
-class MathGuru(): Operations{
-    override fun gcd(a: Int, b: Int): Int {
+open class MathGuru(): Functions{
+    override fun gcd(a: Int, b: Int): Int? {
         val factorsOfA = sieve(num = a)
         val factorsOfB = sieve(num = b)
+
+        if(factorsOfA.isEmpty() && factorsOfB.isEmpty()){
+            println("GCD of 0 and 0 is undefined")
+            return null
+        }else if (factorsOfA.isNotEmpty() && factorsOfB.isEmpty()){
+            return a
+        }else if (factorsOfA.isEmpty() && factorsOfB.isNotEmpty()){
+            return b
+        }
         var result = 1
-        for (num in factorsOfA.keys){
-            if(num in factorsOfB.keys){
+        for (num in factorsOfA.keys) {
+            if (num in factorsOfB.keys) {
                 val freqOfNumInA = factorsOfA[num] ?: 0
                 val freqOfNumInB = factorsOfB[num] ?: 0
                 val minAmount = min(freqOfNumInA, freqOfNumInB).toDouble()
-                result *= pow(num.toDouble(), minAmount).toInt()
+                result *= num.toDouble().pow(minAmount).toInt()
             }
         }
         return result
+
     }
 
-    override fun lcm(a: Int, b: Int): Int {
+    override fun lcm(a: Int, b: Int): Int? {
         val factorsOfA = sieve(num = a)
         val factorsOfB = sieve(num = b)
+        if (factorsOfA.isEmpty() && factorsOfB.isEmpty()){
+            println("LCM of 0 and 0 is undefined.")
+            return null
+        }else if(factorsOfA.isEmpty() || factorsOfB.isEmpty()){
+            return 0
+        }
         var result = a
         for (num in factorsOfB.keys){
             val freqOfNumInA = factorsOfA[num] ?: 0
@@ -37,16 +53,16 @@ class MathGuru(): Operations{
                 if(freqOfNumInB <= freqOfNumInA) continue
 
                 val minAmount = (freqOfNumInB - freqOfNumInA).toDouble()
-                result *= pow(num.toDouble(), minAmount).toInt()
+                result *= num.toDouble().pow(minAmount).toInt()
             }else{
-                result *= pow(num.toDouble(), freqOfNumInB.toDouble()).toInt()
+                result *= num.toDouble().pow(freqOfNumInB.toDouble()).toInt()
             }
         }
         return result
     }
 
-    override fun dollarCount(s: String): Boolean {
-        return false
+    override fun containsDollarSign(s: String): Boolean {
+        return '$' in s
     }
 
     override fun evenSum(n: Int): Int {
@@ -78,10 +94,7 @@ class MathGuru(): Operations{
 
     private fun sieve(num: Int): MutableMap<Int, Int>{
         var n = num
-        if (n <= 1) {
-            println("No factors for $n")
-            return mutableMapOf()
-        }
+        if (n < 0) n = -n
 
         val nums = IntArray(n + 1) { 0 }
 
@@ -110,11 +123,18 @@ class MathGuru(): Operations{
 
 }
 
+//class TestMath(): MathGuru(){
+//    fun testGCD(){
+//
+//    }
+//}
+
 fun main() {
     val m = MathGuru()
-//    println(m.isPalindrome("jkhfdsj"))
-//    println(m.reverseNum(123))
-//    println(m.evenSum(100))
-//    println(m.gcd(-10, -2))
-//    println(m.lcm(0, 4))
+    println(m.containsDollarSign("abhd$sa"))
+    println(m.isPalindrome("jkhfdsj"))
+    println(m.reverseNum(123))
+    println(m.evenSum(100))
+    println(m.gcd(150, 0))
+    println(m.lcm(5, 8 ))
 }
