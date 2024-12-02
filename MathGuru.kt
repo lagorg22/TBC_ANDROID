@@ -1,5 +1,4 @@
-import java.lang.Math.min
-import kotlin.math.pow
+import kotlin.math.abs
 
 interface Functions{
     fun gcd(a: Int, b: Int): Int?
@@ -11,54 +10,18 @@ interface Functions{
 }
 
 open class MathGuru(): Functions{
-    override fun gcd(a: Int, b: Int): Int? {
-        val factorsOfA = sieve(num = a)
-        val factorsOfB = sieve(num = b)
-
-        if(factorsOfA.isEmpty() && factorsOfB.isEmpty()){
-            println("GCD of 0 and 0 is undefined")
-            return null
-        }else if (factorsOfA.isNotEmpty() && factorsOfB.isEmpty()){
-            return if (a > 0) a else -a
-        }else if (factorsOfA.isEmpty() && factorsOfB.isNotEmpty()){
-            return if (b > 0) b else -b
+    override fun gcd(a: Int, b: Int): Int {
+        require(a != 0 || b != 0){
+          "GCD of 0 and 0 is undefined."
         }
-        var result = 1
-        for (num in factorsOfA.keys) {
-            if (num in factorsOfB.keys) {
-                val freqOfNumInA = factorsOfA[num] ?: 0
-                val freqOfNumInB = factorsOfB[num] ?: 0
-                val minAmount = min(freqOfNumInA, freqOfNumInB).toDouble()
-                result *= num.toDouble().pow(minAmount).toInt()
-            }
-        }
-        return result
-
+        return if (b == 0) abs(a) else gcd(b, a % b)
     }
 
-    override fun lcm(a: Int, b: Int): Int? {
-        val factorsOfA = sieve(num = a)
-        val factorsOfB = sieve(num = b)
-        if (factorsOfA.isEmpty() && factorsOfB.isEmpty()){
-            println("LCM of 0 and 0 is undefined.")
-            return null
-        }else if(factorsOfA.isEmpty() || factorsOfB.isEmpty()){
-            return 0
+    override fun lcm(a: Int, b: Int): Int {
+        require(a != 0 || b != 0){
+            "LCM of 0 and 0 is undefined."
         }
-        var result = if (a > 0) a else -a
-        for (num in factorsOfB.keys){
-            val freqOfNumInA = factorsOfA[num] ?: 0
-            val freqOfNumInB = factorsOfB[num] ?: 0
-            if(num in factorsOfA.keys){
-                if(freqOfNumInB <= freqOfNumInA) continue
-
-                val minAmount = (freqOfNumInB - freqOfNumInA).toDouble()
-                result *= num.toDouble().pow(minAmount).toInt()
-            }else{
-                result *= num.toDouble().pow(freqOfNumInB.toDouble()).toInt()
-            }
-        }
-        return result
+        return abs(a * b) / gcd(a, b)
     }
 
     override fun containsDollarSign(s: String): Boolean {
@@ -66,12 +29,13 @@ open class MathGuru(): Functions{
     }
 
     override fun evenSum(n: Int): Int {
+        if (n <= 0) return 0
         if (n % 2 == 1) return 0 + evenSum(n-1)
-        if (n == 0) return 0
         return n + evenSum(n-2)
     }
 
     override fun reverseNum(num: Int): Int {
+        require(num >= 0){"Number must be a positive integer"}
         var result = 0
         var n = num
         while (n > 0){
@@ -82,48 +46,19 @@ open class MathGuru(): Functions{
     }
 
     override fun isPalindrome(s: String): Boolean {
-        var left = 0
-        var right = s.length - 1
-        while (left <= right) {
-            if (s[left] != s[right]) return false
-            left++
-            right--
-        }
-        return true
+        return s == s.reversed()
     }
-
-    private fun sieve(num: Int): MutableMap<Int, Int>{
-        var n = num
-        if (n < 0) n = -n
-
-        val nums = IntArray(n + 1) { 0 }
-
-        for (i in 2..n) {
-            if (nums[i] > 0) {
-                continue
-            } else {
-                for (j in i * i..n step i) {
-                    if (nums[j] == 0) nums[j] = i
-                }
-            }
-        }
-
-        val factors = mutableMapOf<Int, Int>()
-
-        while (n > 1) {
-            if (nums[n] == 0) {
-                factors[n] = factors.getOrDefault(n, 0) + 1
-                break
-            }
-            factors[nums[n]] = factors.getOrDefault(nums[n], 0) + 1
-            n /= nums[n]
-        }
-        return factors
-    }
-
 }
 
 class TestMath(): MathGuru(){
+    fun testAll(){
+        testGCD()
+        testLCM()
+        testEvenSum()
+        testIsPalindrome()
+        testReverseNum()
+        testContainsDollarSign()
+    }
     fun testGCD(){
         println("===============================Testing GCD=============================")
         testGCDPositiveIntegers()
@@ -186,19 +121,33 @@ class TestMath(): MathGuru(){
         testCaseCheckTwoArgs(firstValues, secondValues, answers, ::lcm)
     }
 
+    fun testIsPalindrome(){
+        println("==============================Testing Palindrome========================================")
+        val values = listOf("11111", "dabbbad", "fsfdf", "111222", "", " ")
+        val answers = listOf(true, true, false, false, true, true)
+        testCaseCheckSingleArg(values, answers, ::isPalindrome)
+    }
+
     fun testContainsDollarSign(){
         println("==============================Testing Dollar Sign $========================================")
         val tmp = "fdsf"
-        val values = listOf("\$kjflds", "lkfds\$", "fds\$fdsfs", "\$\$\$", "", "fdsfs", " ", "fds$tmp", "$tmp")
-        val answers = listOf(true, true, true, true, false, false, false, false, false)
-        for (i in values.indices){
-            val currentCase = values[i]
-            val ans = answers[i]
-            val retValue = containsDollarSign(currentCase)
-            if (retValue != answers[i]){
-                println("Function failed on testcase: containsDollarSign($currentCase). expected: $ans, got: $retValue.")
-            }
-        }
+        val values = listOf("\$kjflds", "lkfds\$", "fds\$fdsfs", "\$\$\$", "", "fdsfs", " ", "fds$tmp", "$tmp", "$")
+        val answers = listOf(true, true, true, true, false, false, false, false, false, true)
+        testCaseCheckSingleArg(values, answers, ::containsDollarSign)
+    }
+
+    fun testEvenSum(){
+        println("==============================Testing Even Sum========================================")
+        val values = listOf(0, 10, 250, 11, 7, -4545)
+        val answers = listOf(0, 30, 15750, 30, 12, 0)
+        testCaseCheckSingleArg(values, answers, ::evenSum)
+    }
+
+    fun testReverseNum(){
+        println("==============================Testing Reverse Num========================================")
+        val values = listOf(1234, 111, 0, -3, 54545423)
+        val answers = listOf(4321, 111, 0, -1, 32454545)
+        testCaseCheckSingleArg(values, answers, ::reverseNum)
     }
 
     private fun testCaseCheckTwoArgs(firstValues: List<Int>, secondValues: List<Int>, answers: List<Int?>,
@@ -217,21 +166,36 @@ class TestMath(): MathGuru(){
         if(allPassed) println("Passed all tests.")
     }
 
-    private fun testCaseCheckSingleArg(values: List<Any>, answers: List<Any>, func: (Any) -> Any){
-
+    private fun <T, R> testCaseCheckSingleArg(values: List<T>, answers: List<R>, func: (T) -> R) {
+        var allPassed = true
+        for (i in values.indices) {
+            val currentCase = values[i]
+            val ans = answers[i]
+            val retValue = func(currentCase)
+            if (retValue != ans) {
+                allPassed = false
+                println("Function failed on testcase: ${func.toString().split(' ')[1]}($currentCase). expected: $ans, got: $retValue.")
+            }
+        }
+        if (allPassed) println("Passed all tests.")
     }
+
 }
 
 fun main() {
-//    val m = MathGuru()
+    val m = MathGuru()
 //    println(m.containsDollarSign("abhd$sa"))
-//    println(m.isPalindrome("jkhfdsj"))
+    println(m.isPalindrome("21112"))
 //    println(m.reverseNum(123))
 //    println(m.evenSum(100))
 //    println(m.gcd(-2, 0))
 //    println(m.lcm(-5, 8 ))
-    val t = TestMath()
+//    val t = TestMath()
 //    t.testLCM()
 //    t.testGCD()
-    t.testContainsDollarSign()
+//    t.testContainsDollarSign()
+//    t.testIsPalindrome()
+//    t.testEvenSum()
+//    t.testReverseNum()
+//    t.testAll()
 }
